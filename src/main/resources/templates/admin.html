@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SPRING</title>
+</head>
+<body>
+<h1>Hello, My Boss!</h1>
+<a th:text="${currentUser.email}"></a>
+<br/>
+<a th:href="@{/logout}">Exit</a>
+
+<br/>
+<form th:method="POST" th:action="@{/admin/findByID}">
+    <label for="id">Enter id for search user:</label>
+    <input type="text" id="id" name="id" placeholder="Input number, please"/>
+    <button type="submit">Search</button>
+</form>
+<br/>
+
+<hr>
+
+<div th:if="${userFound != null}">
+    <h2>User Details</h2>
+    <table class="table" border="1">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>age</th>
+            <th>username</th>
+            <th>password</th>
+            <th>email</th>
+            <th>roles</th>
+            <th>option</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td th:utext="${userFound.id}"></td>
+            <td th:utext="${userFound.name}"></td>
+            <td th:utext="${userFound.age}"></td>
+            <td th:utext="${userFound.username}"></td>
+            <td th:utext="${userFound.password}"></td>
+            <td th:utext="${userFound.email}"></td>
+            <td>
+                        <span th:each="role :${userFound.roles}">
+                            <span th:text="${#strings.substring(role.name, 5)}"></span>
+                            </span>
+            </td>
+            <td><a th:href="@{/admin/edit(id=${userFound.id})}">edit</a>
+                <a th:href="@{/admin/delete_user(id=${userFound.id})}">delete</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<br/>
+
+<div align="center">
+    <h1>Users list</h1>
+    <table border="1">
+        <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>age</th>
+            <th>username</th>
+            <th>password</th>
+            <th>email</th>
+            <th>roles</th>
+            <th>options</th>
+        </tr>
+        <tr th:each="lst: ${users}">
+            <td th:utext="${lst.id}"></td>
+            <td th:utext="${lst.name}"></td>
+            <td th:utext="${lst.age}"></td>
+            <td th:utext="${lst.username}"></td>
+            <td th:utext="${lst.password}"></td>
+            <td th:utext="${lst.email}"></td>
+            <td>
+                <span th:each="role :${lst.roles}">
+                    <span th:text="${#strings.substring(role.name, 5)}"></span>
+                    </span>
+            </td>
+            <td><a th:href="@{/admin/edit(id=${lst.id})}">edit</a>
+                <a th:href="@{/admin/delete_user(id=${lst.id})}">delete</a></td>
+        </tr>
+
+
+    </table>
+</div>
+
+<a th:href="@{/admin/new_user}">Create new user</a>
+</body>
+</html>
