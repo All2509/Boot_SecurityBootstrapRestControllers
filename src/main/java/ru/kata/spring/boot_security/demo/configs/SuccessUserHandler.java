@@ -1,13 +1,13 @@
 package ru.kata.spring.boot_security.demo.configs;
 
 import org.springframework.security.core.Authentication; //Интерфейс, представляющий аутентификационные данные пользователя, включая его роли и права доступа.
-import org.springframework.security.core.authority.AuthorityUtils; //Утилитный класс, который предоставляет методы для работы с правами доступа (authorities).
+import org.springframework.security.core.authority.AuthorityUtils; //класс, который предоставляет методы для работы с правами доступа (authorities).
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler; //Интерфейс, который определяет метод для обработки успешной аутентификации.
 import org.springframework.stereotype.Component; // Аннотация, которая указывает, что данный класс является компонентом Spring
 import javax.servlet.http.HttpServletRequest;  //Классы, представляющие HTTP-запросы
 import javax.servlet.http.HttpServletResponse; //Классы, представляющие HTTP-ответы
 import java.io.IOException;  //исключения
-import java.util.Set;// не допускает дупликатов, коллекция
+import java.util.Set;// не допускает дубликатов, коллекция
 
 @Component
 public class SuccessUserHandler implements AuthenticationSuccessHandler {

@@ -31,6 +31,19 @@
 
     <br/>
 
+    <label>Roles:</label>
+    <div>
+        <input type="checkbox" id="role_admin" name="selectedRoles" value="ROLE_ADMIN"
+               th:checked="${user.roles.contains('ROLE_ADMIN')}">
+        <label for="role_admin">Admin</label>
+    </div>
+    <div>
+        <input type="checkbox" id="role_user" name="selectedRoles" value="ROLE_USER"
+               th:checked="${user.roles.contains('ROLE_USER')}">
+        <label for="role_user">User</label>
+    </div>
+
+    <br/>
     <input type="submit" value="Update">
 </form>
 

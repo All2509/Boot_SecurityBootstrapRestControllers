@@ -5,11 +5,12 @@
 </head>
 <body>
 
-<h1>Welcome, <span th:text="${user.username}"></span>, spring boot security page!</h1>
-<p>Name: <span th:text="${user.name}"></span></p>
+<h1>Welcome,<span th:text="${user.username}"></span>, spring boot security page!</h1>
+<p th:text="'Name: ' + ${user.name}"></p>
 <p>Age: <span th:text="${user.age}"></span></p>
 <p>Email: <span th:text="${user.email}"></span></p>
 <p>Password: <span th:text="${user.password}"></span></p>
+
 
 <a th:href="@{/logout}">LOGOUT</a>
 </body>

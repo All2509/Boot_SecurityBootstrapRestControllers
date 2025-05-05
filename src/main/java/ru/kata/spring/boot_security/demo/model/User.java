@@ -53,14 +53,13 @@ public class User implements UserDetails  {
     Integer age;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
     public User() {
-
     }
 
     public User(Long id, String username, String password, String name, String email, Integer age, Set<Role> roles) {
@@ -70,6 +69,14 @@ public class User implements UserDetails  {
         this.name = name;
         this.email = email;
         this.age = age;
+        this.roles = roles;
+    }
+    public User(String username, Integer age, String name, String password, String email, Set<Role> roles) {
+        this.username = username;
+        this.age = age;
+        this.name = name;
+        this.password = password; // Здесь пароль уже закодирован
+        this.email = email;
         this.roles = roles;
     }
 
@@ -89,12 +96,20 @@ public class User implements UserDetails  {
         return email;
     }
 
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public Integer getAge() {
-        return age;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setAge(Integer age) {
@@ -127,10 +142,6 @@ public class User implements UserDetails  {
     @Override
     public boolean isAccountNonExpired() {
         return true;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public void setRoles(Set<Role> roles) {
@@ -181,5 +192,16 @@ public class User implements UserDetails  {
                 ", age=" + age +
                 ", roles=" + roles +
                 '}';
+    }
+
+    public void update(String name, Integer age, String username, String password, String email, Set<Role> roles) {
+        this.name = name;
+        this.age = age;
+        this.username = username;
+        if (password != null && !password.isEmpty()) {
+            this.password = password; // Обновляем пароль только если он не пустой
+        }
+        this.email = email;
+        this.roles = roles;
     }
 }
