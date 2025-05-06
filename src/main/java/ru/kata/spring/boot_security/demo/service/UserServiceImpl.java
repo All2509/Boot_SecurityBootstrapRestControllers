@@ -8,9 +8,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
-
 import java.security.Principal;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,12 +22,13 @@ import ru.kata.spring.boot_security.demo.model.Role;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -57,12 +56,6 @@ public class UserServiceImpl implements UserService {
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
         return roles.stream().map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList());
     }
-   @Override
-   @Transactional
-    public void saveUser(String username, Integer age, String name, String password, String email, Set<Role> roles) {
-        User user = new User (username, age, name, passwordEncoder.encode(password), email, roles);
-        userRepository.save(user);
-    }
 
     @Transactional
     @Override
@@ -85,50 +78,38 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(Long id, String name, Integer age, String username, String password, String email, Set<Role> roles) {
-        User user = findUserById(id);
-        if (user!= null) {
-            // Создаем временный объект с новыми данными
-            User updatedUser = new User(username, age, name, passwordEncoder.encode(password), email, roles);
-
-            // Обновляем существующий объект
-            user.update(name, age, username, updatedUser.getPassword(), email, roles);
-            userRepository.save(user);
-        }
+    public User saveUserWithRoles(User user, Set<String> selectedRoles) {
+        Set<Role> roles = selectedRoles.stream()
+                .map(roleService::findByName)
+                .collect(Collectors.toSet());
+        user.setRoles(roles);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public void saveUserWithRoles(User user, Set<String> selectedRoles) {
-        // Хэшируем пароль перед сохранением
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Set<Role> roles = new HashSet<>();
+    public void save(User user) {
+        userRepository.save(user);
+    }
+    @Override
+    @Transactional
+    public void updateUserWithRoles(Long id, User user, Set<String> selectedRoles) {
+        User existingUser = findUserById(id);
+        if (existingUser != null) {
+            existingUser.update(user.getName(), user.getAge(), user.getUsername(),
+                    passwordEncoder.encode(user.getPassword()),
+                    user.getEmail(), null);
 
-        if (selectedRoles != null && !selectedRoles.isEmpty()) {
+            Set<Role> roles = new HashSet<>();
             for (String roleName : selectedRoles) {
-                Role role = roleRepository.findByName(roleName); // Находим роль по имени
+                Role role = roleService.findByName(roleName);
                 if (role != null) {
-                    roles.add(role); // Добавляем роль в набор, если она найдена
+                    roles.add(role);
                 }
             }
+            existingUser.setRoles(roles);
+            userRepository.save(existingUser);
         }
-
-        user.setRoles(roles); // Устанавливаем роли для пользователя
-        userRepository.save(user); // Сохраняем пользователя в базе данных
-    }
-
-    public void updateUserWithRoles(Long id, User user, Set<String> selectedRoles) {
-        // Получаем все роли из репозитория
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : selectedRoles) {
-            Role role = roleRepository.findByName(roleName);
-            if (role != null) {
-                roles.add(role);
-            }
-        }
-        // Обновляем пользователя
-        updateUser(id, user.getName(), user.getAge(), user.getUsername(), user.getPassword(), user.getEmail(), roles);
     }
 }
-
-

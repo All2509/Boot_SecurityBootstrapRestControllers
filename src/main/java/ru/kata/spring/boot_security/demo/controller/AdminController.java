@@ -14,22 +14,21 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.model.Role;
-import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-
     private final UserService userService;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
-    public AdminController(UserService userService, RoleRepository roleRepository) {
+    public AdminController (UserService userService, RoleService roleService) {
         this.userService = userService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
-    @GetMapping()
+    @GetMapping
     public String admin(Model model, Principal principal) {
         User user = userService.getCurrentUser(principal); //получаем аутентифицированного пользователя из сессии
         model.addAttribute("currentUser", user); //добавляем в шаблон конкретного пользователя
@@ -41,7 +40,7 @@ public class AdminController {
     @GetMapping("/new_user")
     public ModelAndView newUser(@ModelAttribute("user") User user) {  //ModelAndView — это контейнер, объединяющий данные модели и представление (шаблон, который будет использоваться для отображения этих данных).
         ModelAndView mav = new ModelAndView("new_user");  //new_user имя шаблона
-        List<Role> roles = roleRepository.findAll();
+        List<Role> roles = roleService.findAllRoles();
         mav.addObject("allRoles", roles);  //можно добавлять данные в модель с помощью метода addObject()
         return mav; //не используется в данном шаблоне allRoles загружаются не динамически, а прописаны заранее
     }
@@ -49,9 +48,10 @@ public class AdminController {
     @PostMapping("/new_user")  //метод обрабатывает создание нового пользователя и связывает его с выбранными ролями
     public String saveUser(@ModelAttribute User user, //В этом коде аннотация @ModelAttribute("user") указывает Spring взять данные из запроса и заполнить ими объект типа User.
                            @RequestParam Set<String> selectedRoles) { //мы извлекаем набор строковых значений (имен ролей), которые были выбраны пользователем в форме(браузере).
-        userService.saveUserWithRoles(user, selectedRoles); // Передаем пользователя и выбранные роли в сервис
+        User preparedUser = userService.saveUserWithRoles(user, selectedRoles); // Получаем подготовленного пользователя с ролями
         return "redirect:/admin";
     }
+
 
     @GetMapping("/delete_user")
     public String deleteUser(@RequestParam Long id) {

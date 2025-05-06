@@ -1,16 +1,13 @@
 package ru.kata.spring.boot_security.demo.repositories;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.User;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
-@Transactional
 public class UserRepositoryImpl implements UserRepository {
 
     @PersistenceContext
@@ -28,27 +25,27 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User findUserById(Long id) {
-        return entityManager.find(User.class, id); // Поиск пользователя по ID
+        return entityManager.find(User.class, id);
     }
 
     @Override
     public User findByUsername(String username) {
         TypedQuery<User> query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class);
         query.setParameter("username", username);
-        return query.getSingleResult(); // Поиск пользователя по имени пользователя
+        return query.getSingleResult();
     }
 
     @Override
     public List<User> findAll() {
         TypedQuery<User> query = entityManager.createQuery("SELECT u FROM User u", User.class);
-        return query.getResultList(); // Получение всех пользователей
+        return query.getResultList();
     }
 
     @Override
     public void deleteById(Long id) {
         User user = findUserById(id);
         if (user != null) {
-            entityManager.remove(user); // Удаление пользователя по ID
+            entityManager.remove(user);
         }
     }
 }
