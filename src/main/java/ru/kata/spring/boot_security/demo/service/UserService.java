@@ -13,8 +13,9 @@ public interface UserService extends UserDetailsService {
     void deleteById(Long id);
     User getCurrentUser(Principal principal);
     User saveUserWithRoles(User user, Set<String> selectedRoles);
-    void save(User user);
+    void createUser(User user);
     void updateUserWithRoles(Long id, User user, Set<String> selectedRoles);
+    void updateUser(User user);
 }
 
 /*

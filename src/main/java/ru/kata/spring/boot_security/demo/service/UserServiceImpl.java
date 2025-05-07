@@ -84,14 +84,22 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return userRepository.createUser(user);
     }
 
     @Override
     @Transactional
-    public void save(User user) {
-        userRepository.save(user);
+    public void createUser(User user) {
+        userRepository.createUser(user);
     }
+
+    @Override
+    @Transactional
+    public void updateUser(User user) {
+        userRepository.updateUser(user);
+    }
+
+
     @Override
     @Transactional
     public void updateUserWithRoles(Long id, User user, Set<String> selectedRoles) {
@@ -109,7 +117,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             existingUser.setRoles(roles);
-            userRepository.save(existingUser);
+            userRepository.updateUser(existingUser);
         }
     }
 }

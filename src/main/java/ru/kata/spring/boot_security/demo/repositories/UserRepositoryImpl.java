@@ -13,14 +13,21 @@ public class UserRepositoryImpl implements UserRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Override
-    public User save(User user) {
-        if (user.getId() == null) {
-            entityManager.persist(user); // Сохранение нового пользователя
-        } else {
-            entityManager.merge(user); // Обновление существующего пользователя
+    // Метод для сохранения нового пользователя
+    public User createUser(User user) {
+        if (user.getId() != null) {
+            throw new IllegalArgumentException("User ID must be null for a new user.");
         }
+        entityManager.persist(user);
         return user;
+    }
+
+    // Метод для обновления существующего пользователя
+    public User updateUser(User user) {
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID must not be null for an existing user.");
+        }
+        return entityManager.merge(user);
     }
 
     @Override

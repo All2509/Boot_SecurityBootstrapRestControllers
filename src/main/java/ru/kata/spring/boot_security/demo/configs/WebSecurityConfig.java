@@ -6,6 +6,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 @EnableWebSecurity
@@ -19,6 +20,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.userService = userService;
     }
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -31,14 +35,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .logout()
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login")
                 .permitAll();
     }
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(new PasswordEncoderConfig().passwordEncoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
         authenticationProvider.setUserDetailsService(userService);
         return authenticationProvider;
     }

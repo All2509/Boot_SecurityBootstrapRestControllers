@@ -71,14 +71,6 @@ public class User implements UserDetails  {
         this.age = age;
         this.roles = roles;
     }
-//    public User(String username, Integer age, String name, String password, String email, Set<Role> roles) {
-//        this.username = username;
-//        this.age = age;
-//        this.name = name;
-//        this.password = password; // Здесь пароль уже закодирован
-//        this.email = email;
-//        this.roles = roles;
-//    }
 
     public Long getId() {
         return id;
