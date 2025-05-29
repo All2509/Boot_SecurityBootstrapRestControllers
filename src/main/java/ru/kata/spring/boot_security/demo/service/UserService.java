@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface UserService extends UserDetailsService {
-    User findByUsername(String username);
+    User findByEmail(String email); // Изменено на поиск по email
     List<User> findAll();
     User findUserById(Long id);
     void deleteById(Long id);

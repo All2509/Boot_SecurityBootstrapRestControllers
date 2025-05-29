@@ -19,7 +19,8 @@ public class UserController {
     @GetMapping("/user")
     public String user(Model model, Principal principal) {
         User user = userService.getCurrentUser(principal);
-        model.addAttribute("user", user); //добавляю сущность user со всеми полями
+       // model.addAttribute("user", user); //добавляю сущность user со всеми полями
+        model.addAttribute("currentUser", user);
         return "user";
     }
 }

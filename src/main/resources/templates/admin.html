@@ -2,94 +2,456 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>SPRING</title>
+    <title>Admin panel</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .header {
+            background-color: black;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        .logout-btn {
+            position: absolute;
+            right: 30px;
+            top: 15px;
+        }
+        .table-container {
+            margin: 1cm 1cm 1cm 1cm;
+            border: 1px solid #dee2e6; /* Рамка вокруг таблицы */
+            border-radius: 0.25rem; /* Закругленные углы */
+            overflow: hidden; /* Скрыть переполнение */
+        }
+        .table-header {
+            background-color: #f8f9fa; /* Цвет фона для заголовка "All users" */
+            border-bottom: 1px solid #dee2e6; /* Рамка снизу заголовка */
+            margin-bottom: 0; /* Убираем отступ снизу */
+        }
+        table {
+            background-color: white; /* Белый фон для всей таблицы */
+            color: black; /* Черный текст для всей таблицы */
+        }
+        th, td {
+            background-color: white; /* Белый фон для ячеек заголовков и данных */
+            color: black; /* Черный текст для ячеек заголовков и данных */
+        }
+        th {
+            font-weight: bold; /* Жирный текст для заголовков */
+        }
+    </style>
 </head>
 <body>
-<h1>Hello, My Boss!</h1>
-<a th:text="${currentUser.email}"></a> <!-- Здесь будет отображен email текущего пользователя --> <!--Тег <a> в HTML обозначает "anchor" (якорь). Это слово было выбрано, потому что этот тег используется для создания гиперссылок, которые "якорят" (или связывают) одну часть документа с другой частью или с другим документом.-->
-<br/>                                   <!--Тег <br> в HTML обозначает "break" (разрыв). Он используется для создания разрыва строки в тексте. Это слово отражает основную функцию этого тега — разрывать текущую строку и начинать новую. Объяснение термина "break"-->
-<a th:href="@{/logout}">Exit</a>         <!-- Разрыв строки: Когда вы используете <br>, вы говорите браузеру, что нужно прекратить текущую строку и начать новую. Это полезно, когда вы хотите разделить текст на несколько строк без создания нового абзаца.-->
 
-<br/>
-<form th:method="POST" th:action="@{/admin/findByID}">             <!--th:method="POST" используется метод POST, что означает, что данные будут отправлены в теле запроса.-->  <!--атрибут Thymeleaf, который указывает URL, на который будут отправлены данные формы при ее отправке-->
-    <label for="id">Enter id for search user:</label>               <!--Этот тег создает метку для элемента ввода (input)-->
-    <input type="text" id="id" name="id" placeholder="Input number, please"/>    <!--то, чтов самом окошке для ввода бесцветно видно-->
-    <button type="submit">Search</button>                                         <!--сама кнопка SEarch-->
-</form>                                <!--Этот тег определяет форму, которая будет отправлять данные на сервер.-->
-<br/>
-
-<hr>  <!--<hr> (Horizontal Rule): Этот тег создает горизонтальную линию, которая используется для визуального разделения контента на странице.-->
-
-<div th:if="${userFound != null}">           <!--Это атрибут Thymeleaf, который указывает, что содержимое этого блока будет отображаться только в том случае, если переменная userFound не равна null. Это условие позволяет динамически показывать или скрывать блок с деталями пользователя в зависимости от того, был ли найден пользователь.-->
-    <h2>User Details</h2>
-    <table class="table" border="1">         <!--<table> (Table): Этот тег используется для создания таблицы. border="1": Этот атрибут устанавливает границу таблицы. Значение "1" означает, что граница будет видимой и иметь толщину в 1 пиксель.-->
-        <thead>                               <!-- (Table Head): заголовок таблицы-->
-        <tr>
-            <th>id</th>
-            <th>name</th>
-            <th>age</th>
-            <th>username</th>
-            <th>password</th>
-            <th>email</th>
-            <th>roles</th>
-            <th>option</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td th:utext="${userFound.id}"></td>
-            <td th:utext="${userFound.name}"></td>
-            <td th:utext="${userFound.age}"></td>
-            <td th:utext="${userFound.username}"></td>
-            <td th:utext="${userFound.password}"></td>
-            <td th:utext="${userFound.email}"></td>
-            <td>
-                        <span th:each="role :${userFound.roles}">   <!--<span> (Span):Этот тег используется для создания строчного контейнера, который не имеет визуального представления сам по себе, но может содержать текст или другие элементы.Внутри <td>, первый <span> использует атрибут th:each, чтобы перебрать коллекцию ролей пользователя (userFound.roles). Для каждой роли создается новый элемент <span>.th:text="${#strings.substring(role.name, 5)}": Этот атрибут Thymeleaf извлекает подстроку из имени роли, начиная с пятого символа. Это может быть полезно для удаления префикса из названия роли.-->
-                            <span th:text="${#strings.substring(role.name, 5)}"></span>    <!--Второй <span>:Этот тег находится внутри первого <span>, и он будет отображать название роли без первых четырех символов.-->
-                            </span>
-            </td>
-            <td><a th:href="@{/admin/edit(id=${userFound.id})}">edit</a>     <!--Создает ссылку на страницу редактирования пользователя с использованием его идентификатора. При нажатии на эту ссылку пользователь будет перенаправлен на страницу редактирования.-->
-                <a th:href="@{/admin/delete_user(id=${userFound.id})}">delete</a></td>  <!--Создает ссылку для удаления пользователя по его идентификатору.-->
-        </tr>
-        </tbody>
-    </table>
-</div>   <!--<div> (Division): Этот тег используется для создания контейнера для других элементов. Он не имеет никакого визуального представления сам по себе, но позволяет группировать элементы и применять к ним стили или скрипты.-->
-
-<br/>
-
-<div align="center">     <!--используется для создания контейнера с содержимым, выровненным по центру-->
-    <h1>Users list</h1>
-    <table border="1">
-        <tr>
-            <th>id</th>
-            <th>name</th>
-            <th>age</th>
-            <th>username</th>
-            <th>password</th>
-            <th>email</th>
-            <th>roles</th>
-            <th>options</th>
-        </tr>
-        <tr th:each="lst: ${users}">  <!--Переменная lst служит временным контейнером для каждого объекта пользователя во время итерации.-->
-            <td th:utext="${lst.id}"></td>   <!--lst — это просто имя переменной, которое может быть выбрано разработчиком.-->
-            <td th:utext="${lst.name}"></td>
-            <td th:utext="${lst.age}"></td>
-            <td th:utext="${lst.username}"></td>
-            <td th:utext="${lst.password}"></td>
-            <td th:utext="${lst.email}"></td>
-            <td>
-                <span th:each="role :${lst.roles}">
-                    <span th:text="${#strings.substring(role.name, 5)}"></span>
-                    </span>
-            </td>
-            <td><a th:href="@{/admin/edit(id=${lst.id})}">edit</a>
-                <a th:href="@{/admin/delete_user(id=${lst.id})}">delete</a></td>
-        </tr>
-
-
-    </table>
+<div class="header">
+    <span th:text="${currentUser.email}"></span> with roles:
+    <span th:text="${#strings.substring(currentUser.roles[0].name,5)}"></span>
+    <a href="/logout" class="btn btn-outline-light btn-sm logout-btn">Logout</a>
 </div>
 
-<a th:href="@{/admin/new_user}">Create new user</a>
-</body>
-</html>
+<div class="container-fluid" style="height: 100vh; padding: 0;">
+    <div class="row" style="height: 100%;">
+        <div class="col-md-2" style="background-color: white; height: 100%; padding: 0;"> <!-- Белый фон для кнопок -->
+            <button type="button" class="btn btn-primary btn-lg w-100 text-left" style="border-radius: 0;">Admin</button>
+            <a href="/user" class="btn btn-outline-primary btn-lg w-100 text-left" style="border-radius: 0;">User</a>
+        </div>
+
+        <style>
+            .btn-outline-primary {
+                border-color: transparent; /* Убираем границу */
+            }
+            .btn-outline-primary:hover {
+                background-color: blue;
+                color: white;
+            }
+            .btn-outline-primary:active {
+                background-color: blue;
+                color: white;
+            }
+        </style>
+
+        <div class="col-md-9 light-gray-bg"> <!-- Светло-серая часть -->
+            <h2 class="text-left mt-3">Admin Panel</h2> <!-- Заголовок -->
+
+            <!-- Вкладки -->
+            <div class="container-fluid">
+                <nav>
+                    <div class="nav nav-tabs border-bottom-0" id="nav-tab" role="tablist">
+                        <a class="nav-link active" id="nav-users_table-link" data-toggle="tab" href="#nav-users_table"
+                           role="tab" aria-controls="nav-users_table">Users table</a>
+                        <a class="nav-link" id="nav-user_form-link" data-toggle="tab" href="#nav-user_form"
+                           role="tab">New User</a>
+                    </div>
+                </nav>
+
+
+                <!-- Контент вкладок -->
+                <div class="tab-content mt-4">
+                    <!-- Вкладка Users table -->
+                    <div class="tab-pane fade show active" id="nav-users_table" role="tabpanel"
+                         aria-labelledby="nav-users_table-link">
+                        <div class="table-container mr-3 d-flex"> <!-- Добавляем класс d-flex -->
+                            <table class="table table-hover flex-grow-1">
+                                <thead>
+                                <tr class="table-header">
+                                    <th colspan="8" class="text-left"> All Users</th> <!-- Заголовок таблицы -->
+                                </tr>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Age</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                </tr>
+                                </thead>
+
+                                <!-- Данные пользователей -->
+                                <tbody th:each="user : ${users}">
+                                <tr>
+                                    <td th:text="${user.id}"></td>
+                                    <td th:text="${user.name}"></td>
+                                    <td th:text="${user.username}"></td>
+                                    <td th:text="${user.age}"></td>
+                                    <td th:text="${user.email}"></td>
+                                    <td>
+                                        <div th:if="${not #lists.isEmpty(user.roles)}">
+                                            <span th:text="${#strings.substring(user.roles[0].name, 5)}"></span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Кнопки редактирования и удаления -->
+                                    <td>
+                                        <!-- Изменяем кнопку Edit -->
+                                        <button type = "button"
+                                                class = "btn bg-info text-white edit-button"
+                                                data-toggle = "modal"
+                                                data-target = "#userEditDialog"
+                                                th:data-userid="${user.id}"
+                                                th:data-name="${user.name}"
+                                                th:data-username="${user.username}"
+                                                th:data-age="${user.age}"
+                                                th:data-email="${user.email}"
+                                                th:data-password="${user.password}"
+                                                th:data-roles="${#strings.listJoin(user.roles, ',')}"
+                                        >Edit
+                                        </button >
+                                    </td>
+                                    <td><button
+                                            type = "button"
+                                            class = "btn btn-danger delete-button"
+                                            data-toggle = "modal"
+                                            data-target = "#userDeleteDialog"
+                                            th:data-userid="${user.id}"
+                                            th:data-name="${user.name}"
+                                            th:data-username="${user.username}"
+                                            th:data-age="${user.age}"
+                                            th:data-email="${user.email}"
+                                            th:data-roles="${#strings.listJoin(user.roles, ',')}"
+                                    >Delete</button></td>
+                                </tr>
+                                </tbody>
+                                <!-- Модальное окно редактирования пользователя -->
+                                <div class="modal fade" id="userEditDialog" tabindex="-1" role="dialog" aria-labelledby="userEditDialogLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="userEditDialogLabel">Edit user</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="editUserForm">
+                                                    <div class="form-group">
+                                                        <label for="user-id">ID</label>
+                                                        <input type="text" class="form-control" id="user-id" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-name">First name</label>
+                                                        <input type="text" class="form-control" id="user-name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-username">Last name</label>
+                                                        <input type="text" class="form-control" id="user-username">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-age">Age</label>
+                                                        <input type="number" class="form-control" id="user-age">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-email">Email</label>
+                                                        <input type="email" class="form-control" id="user-email">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-password">Password</label>
+                                                        <input type="password" class="form-control" id="user-password">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="user-role">Role</label>
+                                                        <select multiple size=2 class = "form-control mx-auto" id = "user-role"
+                                                                style = "width: 100%;" >
+                                                            <option value = "ROLE_ADMIN">ADMIN</option >
+                                                            <option value = "ROLE_USER">USER</option >
+                                                        </select >
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type = "button" class = "btn btn-secondary"
+                                                        data-dismiss = "modal">Close</button >
+                                                <button type = "button"
+                                                        id = "save-user-button"
+                                                        class = "btn btn-primary">Edit</button >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Модальное окно удаления пользователя -->
+                                <div class="modal fade" id="userDeleteDialog" tabindex="-1" role="dialog" aria-labelledby="userDeleteDialogLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="userDeleteDialogLabel">Delete user</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="deleteUserForm">
+                                                    <div class="form-group">
+                                                        <label for="delete-user-id">ID</label>
+                                                        <input type="text" class="form-control" id="delete-user-id" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="delete-user-name">First name</label>
+                                                        <input type="text" class="form-control" id="delete-user-name" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="delete-user-username">Last name</label>
+                                                        <input type="text" class="form-control" id="delete-user-username" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="delete-user-age">Age</label>
+                                                        <input type="number" class="form-control" id="delete-user-age" readonly>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="delete-user-email">Email</label>
+                                                        <input type="email" class="form-control" id="delete-user-email" readonly>
+                                                    </div>
+                                                    <!-- Пароль не показываем! -->
+                                                    <div class="form-group">
+                                                        <label for="delete-user-role">Role</label>
+                                                        <select multiple size=2 class = "form-control mx-auto"
+                                                                id = "delete-user-role"
+                                                                style = "width: 100%;" disabled >
+                                                            <option value = "ROLE_ADMIN">ADMIN</option >
+                                                            <option value = "ROLE_USER">USER</option >
+                                                        </select >
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class = "modal-footer">
+                                                <button type = "button"
+                                                        class = "btn btn-secondary"
+                                                        data-dismiss = "modal">Close</button >
+                                                <button type = "button"
+                                                        id = "confirm-delete-button"
+                                                        class = "btn btn-danger">Delete</button >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <!-- Вкладка New User -->
+                    <div class="tab-pane fade" id="nav-user_form" role="tabpanel" aria-labelledby="nav-user_form-link">
+                        <!-- Форма добавления нового пользователя -->
+                        <h3 class="text-left">Add new user</h3>
+
+                        <div class="user-form-container mt-4 p-4 bg-white rounded shadow"> <!-- Контейнер для формы -->
+                            <form action="/admin/new_user" method="post" class="text-center">
+                                <!-- Поля формы -->
+                                <div class="form-group">
+                                    <label for="name">First name:</label>
+                                    <input type="text" class="form-control mx-auto" id="name" name="name" required style="width: 30%;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="username">Last name:</label>
+                                    <input type="text" class="form-control mx-auto" id="username" name="username" required style="width: 30%;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="age">Age:</label>
+                                    <input type="number" class="form-control mx-auto" id="age" name="age" required style="width: 30%;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control mx-auto" id="email" name="email" required style="width: 30%;" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password:</label>
+                                    <input type="password" class="form-control mx-auto" id="password" name="password" required style="width: 30%;" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label for="role">Role:</label>
+                                    <select class = "form-control mx-auto" id = "role" name = "selectedRoles"
+                                            style = "width: 30%;" >
+                                        <option value = "ROLE_ADMIN">ADMIN</option >
+                                        <option value = "ROLE_USER">USER</option >
+                                    </select >
+                                </div>
+
+
+                                <!-- Кнопка отправки формы -->
+                                <button type = "submit" class = "btn btn-success">Add new user</button >
+                            </form >
+                        </div >
+                    </div>
+
+                    <style>
+                        .user-form-container {
+                            background-color: white; /* Белый фон для формы */
+                            padding: 20px; /* Отступы внутри контейнера */
+                            border-radius: 8px; /* Закругленные углы */
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Тень для контейнера */
+                        }
+
+                        .mt-4 {
+                            margin-top: 1.5rem; /* Отступ сверху для контейнера формы */
+                        }
+
+                        .p-4 {
+                            padding: 1.5rem; /* Отступы внутри контейнера формы */
+                        }
+                    </style>
+                </div >
+            </div >
+        </div >
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src = "https://code.jquery.com/jquery-3.5.1.min.js"></script >
+<script src = "https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script >
+<script src = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script >
+<script>
+    $(document).ready(function() {
+        // Открытие модального окна и заполнение полей
+        $('#userEditDialog').on('show.bs.modal', function (event) {
+            let button = $(event.relatedTarget);
+
+            let modal = $(this);
+            modal.find('#user-id').val(button.data('userid'));
+            modal.find('#user-name').val(button.data('name'));
+            modal.find('#user-username').val(button.data('username'));
+            modal.find('#user-age').val(button.data('age'));
+            modal.find('#user-email').val(button.data('email'));
+            modal.find('#user-password').val(button.data('password'));
+
+            // Установить роли
+            let rolesString = button.data('roles');
+            if (rolesString) {
+                let rolesArray = rolesString.split(',');
+                $('#user-role option').each(function() {
+                    $(this).prop('selected', rolesArray.includes($(this).val()));
+                });
+            }
+        });
+
+        // Сохранение изменений
+        $('#save-user-button').click(function() {
+            let modal = $('#userEditDialog');
+
+            let userId   = modal.find('#user-id').val();
+            let name     = modal.find('#user-name').val();
+            let username = modal.find('#user-username').val();
+            let age      = modal.find('#user-age').val();
+            let email    = modal.find('#user-email').val();
+            let password = modal.find('#user-password').val();
+
+            // Получаем выбранные роли
+            let selectedRoles = [];
+            $('#user-role option:selected').each(function() {
+                selectedRoles.push($(this).val());
+            });
+
+            $.ajax({
+                url: '/admin/edit',
+                type: 'POST',
+                data: {
+                    id: userId,
+                    name: name,
+                    username: username,
+                    age: age,
+                    email: email,
+                    password: password,
+                    selectedRoles: selectedRoles // массив ролей
+                },
+                traditional: true, // чтобы массив корректно сериализовался
+                success: () => {
+                    location.reload();
+                },
+                error: (err) => {
+                    alert('Error saving user');
+                }
+            });
+        });
+    });
+
+    $(document).ready(function() {
+        // ... (ваш код для Edit)
+
+        // Открытие модального окна Delete и заполнение полей
+        $('#userDeleteDialog').on('show.bs.modal', function (event) {
+            let button = $(event.relatedTarget);
+
+            let modal = $(this);
+            modal.find('#delete-user-id').val(button.data('userid'));
+            modal.find('#delete-user-name').val(button.data('name'));
+            modal.find('#delete-user-username').val(button.data('username'));
+            modal.find('#delete-user-age').val(button.data('age'));
+            modal.find('#delete-user-email').val(button.data('email'));
+
+            // Установить роли
+            let rolesString = button.data('roles');
+            if (rolesString) {
+                let rolesArray = rolesString.split(',');
+                $('#delete-user-role option').each(function() {
+                    $(this).prop('selected', rolesArray.includes($(this).val()));
+                });
+            }
+        });
+
+        // Подтверждение удаления
+        $('#confirm-delete-button').click(function() {
+            let userId = $('#delete-user-id').val();
+
+            $.ajax({
+                url: '/admin/delete_user',
+                type: 'GET', // или 'DELETE' если поддерживается сервером
+                data: {id: userId},
+                success: () => {
+                    location.reload();
+                },
+                error: () => {
+                    alert('Error deleting user');
+                }
+            });
+        });
+    });
+</script>
+</body >
+</html >
+

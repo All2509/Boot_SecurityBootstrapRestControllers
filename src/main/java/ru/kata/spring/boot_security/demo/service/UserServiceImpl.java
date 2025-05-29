@@ -17,13 +17,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import ru.kata.spring.boot_security.demo.model.Role;
 
-
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userRepository = userRepository;
@@ -33,23 +31,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public User getCurrentUser(Principal principal) {
-        return findByUsername(principal.getName()); // получаем из БД аутентифицированного пользователя
+    public User findByEmail(String email) { // Изменено на поиск по email
+        return userRepository.findByEmail(email);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username);
+    public User getCurrentUser(Principal principal) {
+        return findByEmail(principal.getName()); // Получаем из БД аутентифицированного пользователя по email
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException { // Изменено на использование email
+        User user = findByEmail(email);
         if (user == null) {
-            throw new UsernameNotFoundException(String.format("User %s not found", username));
+            throw new UsernameNotFoundException(String.format("User %s not found", email));
         }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
                 mapRolesToAuthorities(user.getRoles()));
     }
 
@@ -63,7 +62,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     @Override
     public User findUserById(Long id) {
         return userRepository.findUserById(id);
@@ -75,7 +74,6 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-
     @Override
     @Transactional
     public User saveUserWithRoles(User user, Set<String> selectedRoles) {
@@ -86,6 +84,8 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.createUser(user);
     }
+
+
 
     @Override
     @Transactional
