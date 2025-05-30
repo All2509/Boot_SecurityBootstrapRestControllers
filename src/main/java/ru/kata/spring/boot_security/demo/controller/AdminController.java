@@ -2,10 +2,7 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.kata.spring.boot_security.demo.model.User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.http.ResponseEntity;
+
 
 @Controller
 @RequestMapping("/admin")
@@ -31,13 +27,15 @@ public class AdminController {
         this.roleService = roleService;
     }
 
+
     @GetMapping
-    public String admin(Model model, Principal principal) {
-        User user = userService.getCurrentUser(principal); // Получаем аутентифицированного пользователя из сессии
-        model.addAttribute("currentUser", user); // Добавляем в шаблон конкретного пользователя
-        List<User> users = userService.findAll(); // Находим всех пользователей
-        model.addAttribute("users", users); // Добавляем их в шаблон
-        return "admin";
+    public ModelAndView admin(Principal principal) {
+        ModelAndView mav = new ModelAndView("admin");
+        User user = userService.getCurrentUser(principal);
+        List<User> users = userService.findAll();
+        mav.addObject("currentUser", user);
+        mav.addObject("users", users);
+        return mav;
     }
 
     @GetMapping("/new_user")
@@ -49,53 +47,28 @@ public class AdminController {
     }
 
     @PostMapping("/new_user")
-    public String saveUser(@ModelAttribute User user,
-                           @RequestParam Set<String> selectedRoles) {
-        User preparedUser = userService.saveUserWithRoles(user, selectedRoles);
-        return "redirect:/admin";
+    public ModelAndView saveUser(@ModelAttribute User user,
+                                 @RequestParam Set<String> selectedRoles) {
+        userService.saveUserWithRoles(user, selectedRoles);
+        return new ModelAndView("redirect:/admin");
     }
 
-
-    @GetMapping("/delete_user")
-    public String deleteUser(@RequestParam Long id) {
-        userService.deleteById(id);
-        return "redirect:/admin";
-    }
-
-//    @GetMapping("/edit")
-//    public String editUser(@RequestParam Long id, Model model) {
-//        model.addAttribute("user", userService.findUserById(id));
-//        return "edit";
-//    }
 
     @GetMapping("/edit")
-    @ResponseBody // Указывает, что результат будет возвращен как тело ответа
-    public ResponseEntity<User> editUser(@RequestParam Long id) {
+    public ModelAndView editUser(@RequestParam Long id) {
         User user = userService.findUserById(id);
+        ModelAndView mav = new ModelAndView("admin");
         if (user != null) {
-            return ResponseEntity.ok(user); // Возвращаем пользователя с кодом 200 OK
-        } else {
-            return ResponseEntity.notFound().build(); // Возвращаем 404, если пользователь не найден
+            mav.addObject("user", user);
         }
+        return mav;
     }
 
     @PostMapping("/edit")
-    public String setEdit(@RequestParam Long id,
+    public ModelAndView setEdit(@RequestParam Long id,
                           @ModelAttribute User user,
                           @RequestParam Set<String> selectedRoles) {
         userService.updateUserWithRoles(id, user, selectedRoles);
-        return "redirect:/admin";
-    }
-
-    @PostMapping("/findByID")
-    public String findByName(@RequestParam Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        // Изменяем метод поиска на поиск по email
-        User user = userService.findByEmail(userDetails.getUsername());
-
-        model.addAttribute("currentUser", user);
-        model.addAttribute("userFound", userService.findUserById(id));
-        model.addAttribute("users", userService.findAll());
-
-        return "admin";
+        return new ModelAndView("redirect:/admin");
     }
 }
