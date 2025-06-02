@@ -1,22 +1,26 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.model.User;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
 
-
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
@@ -38,37 +42,60 @@ public class AdminController {
         return mav;
     }
 
-    @GetMapping("/new_user")
-    public ModelAndView newUser(@ModelAttribute("user") User user) {
-        ModelAndView mav = new ModelAndView("new_user");
-        List<Role> roles = roleService.findAllRoles();
-        mav.addObject("allRoles", roles);
-        return mav;
+
+    @GetMapping("/roles")
+    public List<Role> getAllRoles() {
+        return roleService.findAllRoles();
     }
 
-    @PostMapping("/new_user")
-    public ModelAndView saveUser(@ModelAttribute User user,
-                                 @RequestParam Set<String> selectedRoles) {
-        userService.saveUserWithRoles(user, selectedRoles);
-        return new ModelAndView("redirect:/admin");
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(
+            @RequestParam String name,
+            @RequestParam String username,
+            @RequestParam int age,
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam List<String> selectedRoles // список ролей как строки, например "ROLE_ADMIN"
+    ) {
+        User user = new User();
+        user.setName(name);
+        user.setUsername(username);
+        user.setAge(age);
+        user.setEmail(email);
+        user.setPassword(password);
+
+        // Передача объекта User и ролей в сервис для сохранения
+        userService.saveUserWithRoles(user, new HashSet<>(selectedRoles));
+
+        return ResponseEntity.ok("User created");
     }
 
+
+
+
+    @GetMapping("/delete_user")
+    public ResponseEntity<Void> deleteUser(@RequestParam Long id) {
+        userService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/edit")
-    public ModelAndView editUser(@RequestParam Long id) {
+    @ResponseBody
+    public ResponseEntity<User> editUser(@RequestParam Long id) {
         User user = userService.findUserById(id);
-        ModelAndView mav = new ModelAndView("admin");
         if (user != null) {
-            mav.addObject("user", user);
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        return mav;
     }
 
+
     @PostMapping("/edit")
-    public ModelAndView setEdit(@RequestParam Long id,
-                          @ModelAttribute User user,
-                          @RequestParam Set<String> selectedRoles) {
+    public ResponseEntity<User> setEdit(@RequestParam Long id,
+                                        @ModelAttribute User user,
+                                        @RequestParam Set<String> selectedRoles) {
         userService.updateUserWithRoles(id, user, selectedRoles);
-        return new ModelAndView("redirect:/admin");
+        return ResponseEntity.ok(user);
     }
 }

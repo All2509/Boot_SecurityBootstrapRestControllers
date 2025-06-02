@@ -276,8 +276,9 @@
                         <!-- Форма добавления нового пользователя -->
                         <h3 class="text-left">Add new user</h3>
 
-                        <div class="user-form-container mt-4 p-4 bg-white rounded shadow"> <!-- Контейнер для формы -->
-                            <form action="/admin/new_user" method="post" class="text-center">
+                        <div class="user-form-container mt-4 p-4 bg-white rounded shadow">
+                            <!-- Обратите внимание: убрали action и method -->
+                            <form id="userForm" class="text-center">
                                 <!-- Поля формы -->
                                 <div class="form-group">
                                     <label for="name">First name:</label>
@@ -308,13 +309,11 @@
                                     </select >
                                 </div>
 
-
                                 <!-- Кнопка отправки формы -->
-                                <button type = "submit" class = "btn btn-success">Add new user</button >
+                                <button type = "submit" class = "btn btn-success mt-3">Add new user</button >
                             </form >
                         </div >
                     </div>
-
                     <style>
                         .user-form-container {
                             background-color: white; /* Белый фон для формы */
@@ -348,7 +347,7 @@
 <script src = "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script >
 <script>
     $(document).ready(function() {
-        // Открытие модального окна и заполнение полей
+        // Открытие модального окна EDIT и заполнение полей
         $('#userEditDialog').on('show.bs.modal', function (event) {
             let button = $(event.relatedTarget);
 
@@ -401,7 +400,7 @@
                 },
                 traditional: true, // чтобы массив корректно сериализовался
                 success: () => {
-                    location.reload();
+                    window.location.href = "/admin";
                 },
                 error: (err) => {
                     alert('Error saving user');
@@ -411,8 +410,6 @@
     });
 
     $(document).ready(function() {
-        // ... (ваш код для Edit)
-
         // Открытие модального окна Delete и заполнение полей
         $('#userDeleteDialog').on('show.bs.modal', function (event) {
             let button = $(event.relatedTarget);
@@ -440,10 +437,10 @@
 
             $.ajax({
                 url: '/admin/delete_user',
-                type: 'GET', // или 'DELETE' если поддерживается сервером
+                type: 'GET',
                 data: {id: userId},
                 success: () => {
-                    location.reload();
+                    window.location.href = "/admin";
                 },
                 error: () => {
                     alert('Error deleting user');
@@ -451,6 +448,47 @@
             });
         });
     });
+</script>
+<script>  //add new user
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('userForm');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // отменяем стандартную отправку формы
+
+        // собираем данные из полей
+        const data = {
+            name: document.getElementById('name').value,
+            username: document.getElementById('username').value,
+            age: parseInt(document.getElementById('age').value),
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            selectedRoles: [document.getElementById('role').value]
+        };
+
+        fetch('/admin/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при добавлении пользователя');
+                }
+                return response.text();
+            })
+            .then(msg => {
+                alert(msg); // сообщение об успехе
+                window.location.href = "/admin";
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+    });
+
+});
 </script>
 </body >
 </html >
