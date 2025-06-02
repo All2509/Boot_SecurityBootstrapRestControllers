@@ -16,6 +16,7 @@ public interface UserService extends UserDetailsService {
     void createUser(User user);
     void updateUserWithRoles(Long id, User user, Set<String> selectedRoles);
     void updateUser(User user);
+    public User createUserFromParams(String name, String username, int age, String email, String password);
 }
 
 /*

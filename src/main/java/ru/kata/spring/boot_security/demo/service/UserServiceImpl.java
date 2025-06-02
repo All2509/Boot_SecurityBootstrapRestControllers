@@ -85,6 +85,18 @@ public class UserServiceImpl implements UserService {
         return userRepository.createUser(user);
     }
 
+    @Override
+    @Transactional
+    public User createUserFromParams(String name, String username, int age, String email, String password) {
+        User user = new User();
+        user.setName(name);
+        user.setUsername(username);
+        user.setAge(age);
+        user.setEmail(email);
+        user.setPassword(password);
+        return user;
+    }
+
 
 
     @Override

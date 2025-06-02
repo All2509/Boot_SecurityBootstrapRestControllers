@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.ResponseEntity;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
@@ -55,18 +55,10 @@ public class AdminController {
             @RequestParam int age,
             @RequestParam String email,
             @RequestParam String password,
-            @RequestParam List<String> selectedRoles // список ролей как строки, например "ROLE_ADMIN"
+            @RequestParam List<String> selectedRoles
     ) {
-        User user = new User();
-        user.setName(name);
-        user.setUsername(username);
-        user.setAge(age);
-        user.setEmail(email);
-        user.setPassword(password);
-
-        // Передача объекта User и ролей в сервис для сохранения
+        User user = userService.createUserFromParams(name, username, age, email, password);
         userService.saveUserWithRoles(user, new HashSet<>(selectedRoles));
-
         return ResponseEntity.ok("User created");
     }
 
